@@ -8,7 +8,7 @@ SERVER_URL = os.environ['SERVER_URL']
 VOICES = [voice.strip() for voice in os.environ.get('VOICES', '').split(',')]
 MODELS = [model.strip() for model in os.environ.get('MODELS', '').split(',')]
 
-def generate_speechfile(text, model, voice, serverurl, response_format, speed):
+def generate_speechfile(text, model, voice, serverurl, response_format, filename_append_text, speed):
     # Format the current timestamp to include date, hour, and minute
     timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M')
     
@@ -29,7 +29,7 @@ def generate_speechfile(text, model, voice, serverurl, response_format, speed):
         error_message = f"Error: {e}"
         return error_message, None
     
-    filename = f"{timestamp}_{voice}.{response_format}"
+    filename = f"{timestamp}_{voice}.{filename_append_text}.{response_format}"
     with open(filename, 'wb') as file:
         file.write(response.content)
         
@@ -51,7 +51,10 @@ with gr.Blocks() as demo:
 
     slider_speed = gr.Slider(value=1.0, minimum=0.25, maximum=4.0, step=0.1, label="Speed (x)")
 
-    button_generate = gr.Button("Generate File")
+    with gr.Column():
+        textbox_filename_append = gr.Textbox(value="_speech", lines=1, label="Filename Appendix", interactive=True) 
+        button_generate = gr.Button("Generate File")
+    
     files_output= gr.Files(label="Downloadable output file", scale=3)
     success_box = gr.Textbox(label="Output", scale=5)
     
@@ -62,6 +65,7 @@ with gr.Blocks() as demo:
                     dropdown_voice,
                     textbox_serverurl,
                     dropdown_responseformat,
+                    textbox_filename_append,
                     slider_speed] , 
             outputs=[success_box,files_output])
 
