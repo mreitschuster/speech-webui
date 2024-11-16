@@ -35,14 +35,12 @@ def generate_speechfile(text, model, voice, serverurl, response_format, filename
         
     return "Success", filename
 
-with gr.Blocks() as demo:
+with gr.Blocks(title="Speech") as demo:
     textbox_large = gr.Textbox(value="The lazy dev needed some defaults to not always have to enter something.", lines=20, label="Text", interactive=True)
 
     with gr.Row():
         with gr.Column(scale=1):
             dropdown_model = gr.Dropdown(choices=MODELS, value=MODELS[0], label="Model", interactive=True)
-
-            # Initialize the voice dropdown
             dropdown_voice = gr.Dropdown(choices=VOICES, value=VOICES[0], label="Voice", interactive=True)
 
         with gr.Column():
@@ -51,14 +49,18 @@ with gr.Blocks() as demo:
 
     slider_speed = gr.Slider(value=1.0, minimum=0.25, maximum=4.0, step=0.1, label="Speed (x)")
 
-    with gr.Column():
-        textbox_filename_append = gr.Textbox(value="_speech", lines=1, label="Filename Appendix", interactive=True) 
-        button_generate = gr.Button("Generate File")
+    with gr.Row():
+        with gr.Column():
+            textbox_filename_append = gr.Textbox(value="speech", lines=1, label="Filename Appendix", interactive=True) 
+        with gr.Column():
+            button_generate = gr.Button("Generate File")
+
+    with gr.Row():
+        with gr.Column():
+            success_box = gr.Textbox(label="Output", scale=5)
+        with gr.Column():
+            files_output= gr.Files(label="Downloadable output file", scale=3)
     
-    files_output= gr.Files(label="Downloadable output file", scale=3)
-    success_box = gr.Textbox(label="Output", scale=5)
-    
-    # Function to handle the button click and generate/download the file
     button_generate.click(fn=generate_speechfile, 
             inputs=[textbox_large,
                     dropdown_model,
@@ -69,6 +71,5 @@ with gr.Blocks() as demo:
                     slider_speed] , 
             outputs=[success_box,files_output])
 
-# Launch the Gradio app
 demo.launch(server_name="0.0.0.0")
 
