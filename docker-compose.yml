@@ -1,0 +1,12 @@
+services:
+  gradio_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7860:7860"
+    environment:
+      SERVER_URL: "http://masrv:11435/v1/audio/speech"
+      VOICES: MarkusReinsurance,MarkusReinsurance2,MarkusRueckversicherung,NarratorHungerGames,NarratorDiscworld,alloy,echo,fable,onyx,nova,shimmer
+      MODELS: tts-1-hd,tts-1
+    command: ["python", "app.py"]
