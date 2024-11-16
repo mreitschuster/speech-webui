@@ -29,7 +29,7 @@ def generate_speechfile(text, model, voice, serverurl, response_format, filename
         error_message = f"Error: {e}"
         return error_message, None
     
-    filename = f"{timestamp}_{voice}.{filename_append_text}.{response_format}"
+    filename = f"{timestamp}_{voice}_{filename_append_text}.{response_format}"
     with open(filename, 'wb') as file:
         file.write(response.content)
         
