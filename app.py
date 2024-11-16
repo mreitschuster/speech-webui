@@ -42,17 +42,17 @@ def update_file_component(filename):
         return gr.File()
 
 with gr.Blocks() as demo:
-    textbox_large = gr.Textbox(value="The lazy dev needed some defaults to not always have to enter something.", lines=20, label="Text")
+    textbox_large = gr.Textbox(value="The lazy dev needed some defaults to not always have to enter something.", lines=20, label="Text", interactive=True)
     
     with gr.Row():
         with gr.Column(scale=1):
-            dropdown_model = gr.Dropdown(choices=MODELS, value=MODELS[0], label="Model")
+            dropdown_model = gr.Dropdown(choices=MODELS, value=MODELS[0], label="Model", interactive=True)
             
             # Initialize the voice dropdown
-            dropdown_voice = gr.Dropdown(choices=VOICES, value=VOICES[0], label="Voice")
+            dropdown_voice = gr.Dropdown(choices=VOICES, value=VOICES[0], label="Voice", interactive=True)
         
         with gr.Column():
-            textbox_serverurl = gr.Textbox(value=SERVER_URL, lines=1, label="Server URL")
+            textbox_serverurl = gr.Textbox(value=SERVER_URL, lines=1, label="Server URL", interactive=True)
             dropdown_responseformat = gr.Dropdown(choices=["mp3", "opus", "aac", "flac", "wav", "pcm"], value="mp3", label="Response Format")
     
     slider_speed = gr.Slider(value=1.0, minimum=0.25, maximum=4.0, step=0.1, label="Speed (x)")
@@ -64,7 +64,7 @@ with gr.Blocks() as demo:
     # Function to handle the button click and generate/download the file
     def on_button_click():
         filename = generate_file(textbox_large.value, dropdown_model.value, dropdown_voice.value, textbox_serverurl.value, dropdown_responseformat.value, slider_speed.value)
-        return update_file_component(filename)
+        return filename
 
     button_generate.click(fn=on_button_click, outputs=output_file)
 
