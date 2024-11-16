@@ -8,7 +8,9 @@ SERVER_URL = os.environ['SERVER_URL']
 VOICES = [voice.strip() for voice in os.environ.get('VOICES', '').split(',')]
 MODELS = [model.strip() for model in os.environ.get('MODELS', '').split(',')]
 
-def generate_file(text, model, voice, serverurl, response_format, speed):
+def generate_speechfile(text, model, voice, serverurl, response_format, speed
+        ) :
+
     # Format the current timestamp to include date, hour, and minute
     timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M')
     
@@ -26,47 +28,45 @@ def generate_file(text, model, voice, serverurl, response_format, speed):
     
     if response.status_code == 200:
         filename = f"{timestamp}_{voice}.{response_format}"
-        
+
         with open(filename, 'wb') as file:
             file.write(response.content)
             
-        return filename
+        return "Success", filename
     else:
-        return None
+        return response.text, None
 
-def update_file_component(filename):
-    """Helper function for Gradio's File component"""
-    if filename is not None:
-        return gr.File.update(value=filename)
-    else:
-        return gr.File()
 
 with gr.Blocks() as demo:
     textbox_large = gr.Textbox(value="The lazy dev needed some defaults to not always have to enter something.", lines=20, label="Text", interactive=True)
-    
+
     with gr.Row():
         with gr.Column(scale=1):
             dropdown_model = gr.Dropdown(choices=MODELS, value=MODELS[0], label="Model", interactive=True)
-            
+
             # Initialize the voice dropdown
             dropdown_voice = gr.Dropdown(choices=VOICES, value=VOICES[0], label="Voice", interactive=True)
-        
+
         with gr.Column():
             textbox_serverurl = gr.Textbox(value=SERVER_URL, lines=1, label="Server URL", interactive=True)
-            dropdown_responseformat = gr.Dropdown(choices=["mp3", "opus", "aac", "flac", "wav", "pcm"], value="mp3", label="Response Format")
-    
+            dropdown_responseformat = gr.Dropdown(choices=["mp3", "opus", "aac", "flac", "wav", "pcm"], value="mp3", label="Response Format", interactive=True)
+
     slider_speed = gr.Slider(value=1.0, minimum=0.25, maximum=4.0, step=0.1, label="Speed (x)")
-    
+
     button_generate = gr.Button("Generate File")
-    
-    output_file = gr.File()
+    files_output= gr.Files(label="Downloadable output file", scale=3)
+    success_box = gr.Textbox(label="Output", scale=5)
     
     # Function to handle the button click and generate/download the file
-    def on_button_click():
-        filename = generate_file(textbox_large.value, dropdown_model.value, dropdown_voice.value, textbox_serverurl.value, dropdown_responseformat.value, slider_speed.value)
-        return filename
-
-    button_generate.click(fn=on_button_click, outputs=output_file)
+    button_generate.click(fn=generate_speechfile, 
+            inputs=[textbox_large,
+                    dropdown_model,
+                    dropdown_voice,
+                    textbox_serverurl,
+                    dropdown_responseformat,
+                    slider_speed] , 
+            outputs=[success_box,files_output])
 
 # Launch the Gradio app
 demo.launch(server_name="0.0.0.0")
+
