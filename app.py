@@ -8,9 +8,7 @@ SERVER_URL = os.environ['SERVER_URL']
 VOICES = [voice.strip() for voice in os.environ.get('VOICES', '').split(',')]
 MODELS = [model.strip() for model in os.environ.get('MODELS', '').split(',')]
 
-def generate_speechfile(text, model, voice, serverurl, response_format, speed
-        ) :
-
+def generate_speechfile(text, model, voice, serverurl, response_format, speed):
     # Format the current timestamp to include date, hour, and minute
     timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M')
     
@@ -23,19 +21,19 @@ def generate_speechfile(text, model, voice, serverurl, response_format, speed
         "speed": speed
     }
     
-    # Make the HTTP request to the server URL
-    response = requests.post(serverurl, headers={"Content-Type": "application/json"}, json=payload)
+    try:
+        # Make the HTTP request to the server URL
+        response = requests.post(serverurl, headers={"Content-Type": "application/json"}, json=payload)
+        response.raise_for_status()  # Raise an exception for bad status codes
+    except requests.exceptions.RequestException as e:
+        error_message = f"Error: {e}"
+        return error_message, None
     
-    if response.status_code == 200:
-        filename = f"{timestamp}_{voice}.{response_format}"
-
-        with open(filename, 'wb') as file:
-            file.write(response.content)
-            
-        return "Success", filename
-    else:
-        return response.text, None
-
+    filename = f"{timestamp}_{voice}.{response_format}"
+    with open(filename, 'wb') as file:
+        file.write(response.content)
+        
+    return "Success", filename
 
 with gr.Blocks() as demo:
     textbox_large = gr.Textbox(value="The lazy dev needed some defaults to not always have to enter something.", lines=20, label="Text", interactive=True)
